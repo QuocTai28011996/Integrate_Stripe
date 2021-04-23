@@ -6,38 +6,6 @@ const cors = require("micro-cors")();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_DEV);
 const { wrapAsync } = require("../handlers/lib");
 
-const headers = {
-  Authorization: `Token ${process.env.REACT_APP_GUEST_PASS_KEY}`,
-  "Content-Type": "application/json"
-};
-
-const updateUser = async (user, db) => {
-  const newUser = await db.collection("users").findOneAndUpdate(
-    { _id: user.sub },
-    {
-      $set: user,
-      $set: { updatedAt: Math.floor(new Date() / 1000) }
-    },
-    { returnOriginal: false }
-  );
-  return newUser.value;
-};
-
-const userApi = wrapAsync(async function(req, db) {
-  const data = await json(req);
-  const user = data.data;
-  return updateUser(user, db);
-});
-const userQueryApi = wrapAsync(async function(req) {
-  const { query } = parse(req.url, true);
-  const sub = query.sub;
-  const db = await connect();
-  return await db
-    .collection("users")
-    .find({ _id: sub })
-    .toArray();
-});
-
 const createAccountApi = wrapAsync(async function(req, db) {
   const data = await json(req);
   const user = data.data;
